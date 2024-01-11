@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatBot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+</head>
+
+<body>
+    <div class="navbar">
+        <h1 id="title">ChatBot</h1>
+    </div>
+    <div id="container">        
+        <div id="user-message-container">
+        </div>
+        
+        <div id="bot-message-container">
+        </div>
+
+    </div>
+        
+    
+        <div id="input-section">
+            <!-- Input area for entering the message -->
+            <textarea id='input-message' placeholder="Enter your message here"></textarea>
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+    <script>
+
+        // this function will send the message to the bot
+        function displayMessage() {
+            let userMessage = document.getElementById("input-message").value;
+            let chatContainer = document.getElementById("container");
+
+            
+            // Create a new message-container element to add both image and chat bubble
+            let messageContainer = document.createElement("div");
+            messageContainer.classList.add("message-container");
+
+
+            // Create a new chat bubble element
+            let chatBubble = document.createElement("div");
+            chatBubble.classList.add("user-message-container");
+
+            // Create a paragraph element for the message content
+            let messageContent = document.createElement("p");
+            messageContent.textContent = userMessage;
+
+            // Create a span element for the timestamp
+            let timestamp = document.createElement("span");
+            timestamp.textContent = getCurrentTime();
+
+            // Add the user icon to the chat bubble
+            let image = document.createElement("img");
+
+            // Set the source and alt attributes
+            image.src = "{{ url_for('static', filename='images/user.png') }}";
+            image.alt = "user image";
+
+            // Append the message content and timestamp to the chat bubble
+            chatBubble.appendChild(messageContent);
+            chatBubble.appendChild(timestamp);
+
+            // Append the chat bubble to the chat container
+            messageContainer.appendChild(image);
+            messageContainer.appendChild(chatBubble);
+
+            // append the message container to the container
+            chatContainer.appendChild(messageContainer);    
+            
+            
+        }
+
+        // This function will send data to the backend
+        function sendDataToBackend() {
+            let inputMessage = document.getElementById("input-message").value;
+
+            // clear the input field of the data
+            document.getElementById("input-message").value = "";
+
+            return fetch('/receive-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ user_message: inputMessage })
+            })
+            .then(response => response.json())
+            .then(data => displayBotMessage(data['bot-message']));
+
+        }
+
+        
+
+
+        // this function will send the message to the bot
+        function displayBotMessage(bot_message) {
+            let chatContainer = document.getElementById("container");
+
+            // Create a new chat bubble element
+            let chatBubble = document.createElement("div");
+            chatBubble.classList.add("chat-bubble");
+            chatBubble.classList.add("bot-message-container");
+
+            // Create a paragraph element for the message content
+            let messageContent = document.createElement("p");
+            messageContent.textContent = bot_message;
+
+            // Create a span element for the timestamp
+            let timestamp = document.createElement("span");
+            timestamp.textContent = getCurrentTime();
+
+            //Add the user icon to the chatbubble
+            let image = document.createElement("img");
+
+            // set the source and alt attributes
+            image.src = "{{ url_for('static', filename='images/bot.png') }}";
+            image.alt = "bot image";
+
+            // Append the message content and timestamp to the chat bubble
+            chatContainer.appendChild(image);
+            chatBubble.appendChild(messageContent);
+            chatBubble.appendChild(timestamp);
+
+            // Append the chat bubble to the chat container
+            chatContainer.appendChild(chatBubble);
+            
+        }
+        
+        function getCurrentTime() {
+            let currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            return currentTime;
+        }
+
+        // Adding event listener for the button
+        let sendButton = document.getElementById("send-button");
+        sendButton.addEventListener("click", displayMessage);
+        sendButton.addEventListener("click", sendDataToBackend);
+    </script>
+</body>
+
+</html>
